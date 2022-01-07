@@ -1,0 +1,31 @@
+body {
+  background-color: #191970;            /* 背景色 */
+  background-image: url("haikei.png"); /* 画像 */
+  background-size: cover;              /* 全画面 */
+  background-attachment: fixed;        /* 固定 */
+  background-position: center center;  /* 縦横中央 */
+}
+
+h1 {
+  color: #FFFF00/* 文字の色 */;
+  -webkit-text-stroke: 1px #000;
+}
+
+.row-buttons {
+	display: flex;
+	justify-content: center;
+  margin-left: -15px; /* ボタンの位置 */
+}
+
+.button {
+  padding: 8px 20px;/* ボタンの高さと幅 */
+	border-radius: 10px;/* ボタンの角 */
+	font-size: 16px;/* 文字の大きさ */
+  background-color: SpringGreen;
+}
+
+.button2 {
+  background-color: deepskyblue;
+  border-radius: 10px;/* ボタンの角 */
+	font-size: 16px;/* 文字の大きさ */
+}

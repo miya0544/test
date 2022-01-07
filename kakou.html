@@ -1,0 +1,209 @@
+<html lang="ja" class="no-js no-svg">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ぬりけしくん</title>
+    <link rel="stylesheet" href="kakou.css">
+    <meta name="robots" content="noindex">
+
+    <style>
+        canvas {
+            border: 2px solid gray;
+            /* 枠の色と太さ */
+
+        }
+    </style>
+</head>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<!-- HTML5とjQueryでブラウザーがペイントツールに！ -->
+<!-- https://ascii.jp/elem/000/000/515/515898/ -->
+
+<body>
+
+    <h1 style="text-align:center">こたえをタップしてぬりけそう</h1>
+
+    <div style="text-align:center" class="upload">
+        <input type="file" name="file" id="file">
+    </div>
+    <div style="text-align:center">
+        <canvas id="c" class="left20 canvasTools" width="400" height="300" style="background-color: #FFFFFF;"
+            onclick="canvasClick(event);"></canvas><br />
+        <img id="canvasImg" class="left20" src="" />
+    </div>
+    <div hidden class="canvasTools">
+        R: <input type="text" style="display:inline-block; width:auto;" size="4" id="r" /> ±<input type="text"
+            style="display:inline-block; width:auto;" size="4" id="rd" value="20" /><br />
+        G: <input type="text" style="display:inline-block; width:auto;" size="4" id="g" /> ±<input type="text"
+            style="display:inline-block; width:auto;" size="4" id="gd" value="20" /><br />
+        B: <input type="text" style="display:inline-block; width:auto;" size="4" id="b" /> ±<input type="text"
+            style="display:inline-block; width:auto;" size="4" id="bd" value="20" />
+    </div>
+    <div hidden>
+        <input type="button" value="透過" onclick="buttonClick();" /><span></span><input type="button" value="完了"
+            onclick="button2Click();" />
+    </div>
+    <!-- <div id="result"></div> -->
+
+    <script>
+        var file = document.getElementById('file');
+        var canvas = document.getElementById('c');
+        var canvasWidth = 400;
+        var canvasHeight = 300;
+        var uploadImgSrc;
+
+        // Canvasの準備
+        c.width = canvasWidth;
+        c.height = canvasHeight;
+        var ctx = canvas.getContext('2d');
+
+        function loadLocalImage(e) {
+            // ファイル情報を取得
+            var fileData = e.target.files[0];
+
+            // 画像ファイル以外は処理を止める
+            if (!fileData.type.match('image.*')) {
+                alert('画像を選択してください');
+                return;
+            }
+
+            // FileReaderオブジェクトを使ってファイル読み込み
+            var reader = new FileReader();
+            // ファイル読み込みに成功したときの処理
+            reader.onload = function () {
+                // Canvas上に表示する
+                uploadImgSrc = reader.result;
+                canvasDraw();
+            }
+            // ファイル読み込みを実行
+            reader.readAsDataURL(fileData);
+        }
+
+        // ファイルが指定された時にloadLocalImage()を実行
+        file.addEventListener('change', loadLocalImage, false);
+
+        // Canvas上に画像を表示する
+        function canvasDraw() {
+            // canvas内の要素をクリアする
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Canvas上に画像を表示
+            var img = new Image();
+            img.src = uploadImgSrc;
+            img.onload = function () {
+                ctx.drawImage(img, 0, 0, canvasWidth, this.height * (canvasWidth / this.width));
+            }
+            // // canvasを画像に変換
+            // var data = canvas.toDataURL();
+
+            // var dlLink = document.createElement('a');
+            // dlLink.href = data;
+            // dlLink.download = 'sample.png';
+            // dlLink.innerText = 'ダウンロード';
+            // document.getElementById('result').appendChild(dlLink);
+        }
+
+    </script>
+    <script>
+        function button2Click() {
+            var canvas = document.getElementById("c");
+            var src = canvas.toDataURL();
+            var img = document.getElementById("canvasImg");
+            img.src = src;
+            var ts = document.getElementsByClassName("canvasTools");
+            for (var i = 0; i < ts.length; i++) {
+                ts[i].style.display = "none";
+            }
+            img.style.display = "block";
+            var dlLink = document.createElement('a');
+            return;
+        }
+
+        function buttonClick() {
+            var canvas = document.getElementById("c");
+            var context = canvas.getContext("2d");
+            var rgba = { "r": 0, "g": 0, "b": 0, "a": 255, "rd": 0, "gd": 0, "bd": 0 };
+            for (key in rgba) {
+                var obj = document.getElementById(key);
+                if (obj) {
+                    rgba[key] = parseInt(obj.value);
+                    if (rgba[key] < 0) {
+                        rgba[key] = 0;
+                    } else if (rgba[key] > 255) {
+                        rgba[key] = 255;
+                    } else {
+                    }
+                }
+            }
+
+            var imgdt = context.getImageData(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < imgdt.width * imgdt.height; i++) {
+                if ((Math.abs(imgdt.data[i * 4] - rgba.r) > rgba.rd) ||
+                    (Math.abs(imgdt.data[i * 4 + 1] - rgba.g) > rgba.gd) ||
+                    (Math.abs(imgdt.data[i * 4 + 2] - rgba.b) > rgba.bd)) {
+                    continue;
+                }
+                imgdt.data[i * 4 + 0] = 255;  //R
+                imgdt.data[i * 4 + 1] = 255; //G
+                imgdt.data[i * 4 + 2] = 255; //B
+                imgdt.data[i * 4 + 3] = 255;
+
+            }
+
+
+            context.putImageData(imgdt, 0, 0);
+            return;
+        }
+
+        function canvasClick(e) {
+            var canvas = document.getElementById("c");
+            var context = canvas.getContext("2d");
+            var pos = {};
+            pos.x = getPosX(e.clientX);
+            pos.y = getPosY(e.clientY);
+
+            var imgdt = context.getImageData(0, 0, canvas.width, canvas.height);
+            var rgba = {};
+            rgba.r = imgdt.data[(pos.y * canvas.width + pos.x) * 4];
+            rgba.g = imgdt.data[(pos.y * canvas.width + pos.x) * 4 + 1];
+            rgba.b = imgdt.data[(pos.y * canvas.width + pos.x) * 4 + 2];
+            for (key in rgba) {
+                var obj = document.getElementById(key);
+                obj.value = rgba[key];
+            }
+
+            //白色にする処理
+            buttonClick();
+            return;
+        }
+
+        function getPosX(x) {
+            var c = document.getElementById("c");
+            return parseInt(x - (c.getBoundingClientRect().left));
+        }
+
+        function getPosY(y) {
+            var c = document.getElementById("c");
+            return parseInt(y - (c.getBoundingClientRect().top));
+        }
+
+        function loadFunc() {
+            var canvas = document.getElementById("c");
+            var context = canvas.getContext("2d");
+            var img = document.getElementById("canvasImg");
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            return;
+        }
+        loadFunc();//ロード時に実行される
+
+//        registEvent(window, "load", loadFunc);
+    </script>
+    <script type="text/javascript" src="./draw.js"></script>
+
+    </p>
+
+    <button class="button2" onclick="history.back()">←もどる</button>
+</body>
+
+</html>
